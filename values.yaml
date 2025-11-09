@@ -43,8 +43,8 @@ service:
     nodePort: null
 
 ingress:
-  enabled: false
-  className: ""
+  enabled: true
+  className: "traefik"
   annotations: {}
   hosts:
     - host: nexus.local
