@@ -1,0 +1,19 @@
+apiVersion: v2
+name: nexus
+description: A Helm chart for deploying Sonatype Nexus Repository Manager OSS.
+type: application
+version: 0.1.0
+appVersion: "3.71.0"
+home: https://www.sonatype.com/products/sonatype-nexus-repository
+dependencies: []
+sources:
+  - https://github.com/sonatype/docker-nexus3
+icon: https://raw.githubusercontent.com/sonatype/nexus-public/main/plugins/nexus-coreui-plugin/src/main/resources/static/rapture/resources/icons/nexus-icon.png
+keywords:
+  - nexus
+  - sonatype
+  - repository
+  - artifact
+maintainers:
+  - name: Codex
+    email: codex@example.com

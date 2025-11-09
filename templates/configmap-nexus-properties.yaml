@@ -1,0 +1,11 @@
+{{- if .Values.nexusProperties }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "nexus.fullname" . }}-nexus-properties
+  labels:
+    {{- include "nexus.labels" . | nindent 4 }}
+data:
+  {{ .Values.nexusPropertiesFilename }}: |
+    {{- include "nexus.renderProperties" .Values.nexusProperties | nindent 4 }}
+{{- end }}

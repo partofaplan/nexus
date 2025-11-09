@@ -1,0 +1,7 @@
+Nexus Repository Manager is getting ready.
+
+1. Get the pod name:
+  kubectl get pods -l app.kubernetes.io/name={{ include "nexus.name" . }},app.kubernetes.io/instance={{ .Release.Name }}
+2. Forward the HTTP port:
+  kubectl port-forward svc/{{ include "nexus.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+3. Open http://127.0.0.1:{{ .Values.service.port }} and use the admin password stored in /nexus-data/admin.password (exec into the pod to read).
