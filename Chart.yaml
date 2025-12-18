@@ -2,7 +2,7 @@ apiVersion: v2
 name: nexus
 description: A Helm chart for deploying Sonatype Nexus Repository Manager OSS.
 type: application
-version: 0.1.0
+version: 0.2.0
 appVersion: "3.71.0"
 home: https://www.sonatype.com/products/sonatype-nexus-repository
 dependencies: []

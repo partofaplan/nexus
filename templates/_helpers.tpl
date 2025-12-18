@@ -49,3 +49,27 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end -}}
 {{- end -}}
 {{- end -}}
+
+{{- define "nexus.databaseProperties" -}}
+{{- if .Values.database.enabled }}
+nexus.datastore.enabled=true
+nexus.datastore.nexus.jdbcUrl=jdbc:postgresql://{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}{{- if .Values.database.jdbcParameters }}?{{ .Values.database.jdbcParameters }}{{- end }}
+nexus.datastore.nexus.username=${NEXUS_DB_USER}
+nexus.datastore.nexus.password=${NEXUS_DB_PASSWORD}
+{{- if .Values.database.schema }}
+nexus.datastore.nexus.schema={{ .Values.database.schema }}
+{{- end }}
+{{- if .Values.database.maximumPoolSize }}
+nexus.datastore.nexus.maximumPoolSize={{ .Values.database.maximumPoolSize }}
+{{- end }}
+{{- if .Values.database.connectionTimeoutMs }}
+nexus.datastore.nexus.connectionTimeoutMs={{ .Values.database.connectionTimeoutMs }}
+{{- end }}
+{{- if .Values.database.idleTimeoutMs }}
+nexus.datastore.nexus.idleTimeoutMs={{ .Values.database.idleTimeoutMs }}
+{{- end }}
+{{- if .Values.ha.enabled }}
+nexus.datastore.clustered=true
+{{- end }}
+{{- end }}
+{{- end }}

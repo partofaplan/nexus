@@ -1,6 +1,6 @@
 # Sonatype Nexus Repository Helm Chart
 
-This repository provides a vanilla Helm chart for deploying the free (OSS) distribution of Sonatype Nexus Repository 3. The chart focuses on a secure-by-default StatefulSet deployment that exposes the web UI as well as optional Docker registry connectors.
+This repository provides a Helm chart for deploying Sonatype Nexus Repository 3 in a highly available configuration backed by PostgreSQL. The chart keeps a secure-by-default StatefulSet deployment, exposes the web UI and optional Docker registry connectors, and now includes HA-friendly defaults for the delta cluster’s `postgres-delta` database.
 
 ## Prerequisites
 
@@ -28,13 +28,38 @@ The default admin password is written to `/nexus-data/admin.password` the first 
 kubectl exec -n nexus sts/nexus -- cat /nexus-data/admin.password
 ```
 
-> **Note:** Nexus Repository OSS does not support active/active clustering. The `replicaCount` value is available for completeness, but Sonatype only supports `1` replica.
+> **Note:** Active/active HA requires Nexus Repository Pro and a shared blob store (for example S3/MinIO). This chart wires Nexus to PostgreSQL and runs multiple pods, but you must move blob stores to shared storage after installation for true HA behaviour.
+
+## High availability on the delta cluster
+
+1. Create the PostgreSQL database and user (runs against the existing `postgres-delta` HA cluster):
+   ```bash
+   kubectl exec -n postgresql postgres-delta-postgres-ha-0 -- bash -c "PGPASSWORD=PerkinzkSecure42 psql -U perkinzk -h localhost -c \"CREATE DATABASE nexus;\""
+   kubectl exec -n postgresql postgres-delta-postgres-ha-0 -- bash -c "PGPASSWORD=PerkinzkSecure42 psql -U perkinzk -h localhost -c \"CREATE USER nexus WITH PASSWORD 'NexusDbSecure42';\""
+   kubectl exec -n postgresql postgres-delta-postgres-ha-0 -- bash -c "PGPASSWORD=PerkinzkSecure42 psql -U perkinzk -h localhost -c \"GRANT ALL PRIVILEGES ON DATABASE nexus TO nexus;\""
+   ```
+2. Create the Nexus namespace and DB credentials secret consumed by the chart:
+   ```bash
+   kubectl create namespace nexus
+   kubectl create secret generic nexus-db -n nexus \
+     --from-literal=username=nexus \
+     --from-literal=password=NexusDbSecure42
+   ```
+3. Deploy/upgrade Nexus with the built-in HA defaults:
+   ```bash
+   helm upgrade --install nexus . \
+     --namespace nexus --create-namespace
+   ```
+4. After startup, configure your blob stores to use shared object storage (S3/MinIO) before putting the cluster under load.
 
 ## Common configuration
 
 | Value | Description | Default |
 | ----- | ----------- | ------- |
-| `image.repository` / `image.tag` | Container image coordinates for Nexus OSS | `sonatype/nexus3:3.71.0` |
+| `image.repository` / `image.tag` | Container image coordinates for Nexus | `sonatype/nexus3:3.71.0` |
+| `replicaCount` | Number of Nexus pods (HA) | `3` |
+| `database.*` | External PostgreSQL wiring (`host`, `port`, `name`, `user`, `existingSecret` + keys) | Pre-set to `postgres-delta` HA cluster |
+| `ha.*` | HA helpers: PDB, pod management policy, rolling update strategy | Enabled with PDB `minAvailable: 2` |
 | `service.port` | Primary HTTP service port | `8081` |
 | `service.docker.enabled` | Adds an additional Docker-compatible port on the service and container | `true` |
 | `ingress.enabled` | Creates an Ingress resource; configure `ingress.hosts`/`ingress.tls` for your cluster | `false` |

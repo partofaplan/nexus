@@ -6,7 +6,34 @@ image:
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-replicaCount: 1
+replicaCount: 3
+
+ha:
+  enabled: true
+  podDisruptionBudget:
+    enabled: true
+    minAvailable: 2
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate: {}
+
+database:
+  enabled: true
+  host: postgres-delta-postgres-ha-primary.postgresql.svc.cluster.local
+  port: 5432
+  name: nexus
+  schema: public
+  jdbcParameters: "targetServerType=primary&sslmode=disable"
+  user: nexus
+  existingSecret: nexus-db
+  usernameKey: username
+  passwordKey: password
+  password: ""
+  createSecret: false
+  maximumPoolSize: 30
+  connectionTimeoutMs: 30000
+  idleTimeoutMs: 600000
 
 serviceAccount:
   create: true
@@ -71,6 +98,8 @@ persistence:
     - ReadWriteOnce
   size: 50Gi
   annotations: {}
+  chownData: true
+  chownImage: "busybox:1.36"
 
 terminationGracePeriodSeconds: 120
 

@@ -1,4 +1,4 @@
-{{- if .Values.nexusProperties }}
+{{- if or .Values.nexusProperties .Values.database.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -7,5 +7,15 @@ metadata:
     {{- include "nexus.labels" . | nindent 4 }}
 data:
   {{ .Values.nexusPropertiesFilename }}: |
-    {{- include "nexus.renderProperties" .Values.nexusProperties | nindent 4 }}
+    {{- $db := include "nexus.databaseProperties" . | trim }}
+    {{- $userProps := include "nexus.renderProperties" .Values.nexusProperties | trim }}
+    {{- if $db }}
+    {{ $db | nindent 4 }}
+    {{- end }}
+    {{- if and $db $userProps }}
+
+    {{- end }}
+    {{- if $userProps }}
+    {{ $userProps | nindent 4 }}
+    {{- end }}
 {{- end }}

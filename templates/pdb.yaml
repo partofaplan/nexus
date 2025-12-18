@@ -1,0 +1,17 @@
+{{- if and .Values.ha.enabled .Values.ha.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "nexus.fullname" . }}
+  labels:
+    {{- include "nexus.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "nexus.selectorLabels" . | nindent 6 }}
+  {{- if .Values.ha.podDisruptionBudget.minAvailable }}
+  minAvailable: {{ .Values.ha.podDisruptionBudget.minAvailable }}
+  {{- else if .Values.ha.podDisruptionBudget.maxUnavailable }}
+  maxUnavailable: {{ .Values.ha.podDisruptionBudget.maxUnavailable }}
+  {{- end }}
+{{- end }}
