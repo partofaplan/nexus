@@ -70,6 +70,27 @@ kubectl exec -n nexus sts/nexus -- cat /nexus-data/admin.password
 
 Additional fields in `values.yaml` let you control service accounts, probes, topology spread constraints, ingress, extra containers, and arbitrary volumes/mounts.
 
+## Docker registry via Traefik TCP
+
+Nexus Docker repositories require a dedicated connector port so `/v2/` is served at the root. To expose that port through Traefik, enable the TCP route:
+
+```yaml
+service:
+  docker:
+    enabled: true
+    port: 5000
+
+ingressTcp:
+  enabled: true
+  entryPoints:
+    - docker
+  hostSNI: "*"
+  tls:
+    enabled: false
+```
+
+Configure Traefik with a TCP entrypoint on port 5000 (name must match `ingressTcp.entryPoints`) and set the Docker-hosted repo HTTP port in the Nexus UI to the same value.
+
 ## Rendering and applying manifests
 
 To inspect what will be applied without touching the cluster, run:

@@ -80,6 +80,19 @@ ingress:
           pathType: Prefix
   tls: []
 
+ingressTcp:
+  enabled: true
+  apiVersion: "traefik.io/v1alpha1"
+  annotations: {}
+  labels: {}
+  entryPoints:
+    - docker
+  hostSNI: "*"
+  tls:
+    enabled: false
+    passthrough: false
+    secretName: ""
+
 resources:
   requests:
     cpu: 500m
