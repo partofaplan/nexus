@@ -78,7 +78,10 @@ ingress:
       paths:
         - path: /
           pathType: Prefix
-  tls: []
+  tls:
+    - secretName: nexus-tls
+      hosts:
+        - nexus.local
 
 ingressDocker:
   enabled: true
@@ -90,7 +93,11 @@ ingressDocker:
     - host.docker.internal
   path: /
   pathType: Prefix
-  tls: []
+  tls:
+    - secretName: nexus-tls
+      hosts:
+        - nexus-docker.local
+        - host.docker.internal
 
 ingressTcp:
   enabled: false
