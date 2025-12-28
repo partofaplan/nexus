@@ -91,6 +91,24 @@ ingressTcp:
 
 Configure Traefik with a TCP entrypoint on port 5000 (name must match `ingressTcp.entryPoints`) and set the Docker-hosted repo HTTP port in the Nexus UI to the same value.
 
+## Docker registry via HTTP ingress (shared port)
+
+If Traefik already fronts your cluster on a single HTTP entrypoint (for example port 8081), you can keep that port and route by hostname. Enable the Docker ingress and point it at the Docker connector port:
+
+```yaml
+service:
+  docker:
+    enabled: true
+    port: 5000
+
+ingressDocker:
+  enabled: true
+  host: nexus-docker.local
+  path: /
+```
+
+This keeps the UI on `nexus.local` and the registry on `nexus-docker.local` without opening another load balancer port. The registry URL is `nexus-docker.local:<traefik-port>`.
+
 ## Rendering and applying manifests
 
 To inspect what will be applied without touching the cluster, run:

@@ -20,15 +20,15 @@ ha:
 
 database:
   enabled: true
-  host: postgres-delta-postgres-ha-primary.postgresql.svc.cluster.local
+  host: nexus-db-postgres-ha-primary.nexus.svc.cluster.local
   port: 5432
   name: nexus
   schema: public
   jdbcParameters: "targetServerType=primary&sslmode=disable"
-  user: nexus
-  existingSecret: nexus-db
-  usernameKey: username
-  passwordKey: password
+  user: perkinzk
+  existingSecret: nexus-db-postgres-ha-credentials
+  usernameKey: superuser-username
+  passwordKey: superuser-password
   password: ""
   createSecret: false
   maximumPoolSize: 30
@@ -63,7 +63,7 @@ service:
   clusterIP: ""
   loadBalancerIP: ""
   loadBalancerSourceRanges: []
-  port: 8081
+  port: 80
   docker:
     enabled: true
     port: 5000
@@ -80,8 +80,17 @@ ingress:
           pathType: Prefix
   tls: []
 
-ingressTcp:
+ingressDocker:
   enabled: true
+  className: "traefik"
+  annotations: {}
+  host: nexus-docker.local
+  path: /
+  pathType: Prefix
+  tls: []
+
+ingressTcp:
+  enabled: false
   apiVersion: "traefik.io/v1alpha1"
   annotations: {}
   labels: {}

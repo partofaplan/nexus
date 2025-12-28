@@ -1,0 +1,31 @@
+{{- if and .Values.ingressDocker.enabled .Values.service.docker.enabled }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "nexus.fullname" . }}-docker
+  labels:
+    {{- include "nexus.labels" . | nindent 4 }}
+  {{- with .Values.ingressDocker.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- with .Values.ingressDocker.className }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+    - host: {{ .Values.ingressDocker.host }}
+      http:
+        paths:
+          - path: {{ .Values.ingressDocker.path }}
+            pathType: {{ default "Prefix" .Values.ingressDocker.pathType }}
+            backend:
+              service:
+                name: {{ include "nexus.fullname" . }}
+                port:
+                  number: {{ .Values.service.docker.port }}
+  {{- with .Values.ingressDocker.tls }}
+  tls:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
