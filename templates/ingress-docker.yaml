@@ -13,17 +13,20 @@ spec:
   {{- with .Values.ingressDocker.className }}
   ingressClassName: {{ . }}
   {{- end }}
+  {{- $hosts := .Values.ingressDocker.hosts | default (list .Values.ingressDocker.host) }}
   rules:
-    - host: {{ .Values.ingressDocker.host }}
+    {{- range $host := $hosts }}
+    - host: {{ $host }}
       http:
         paths:
-          - path: {{ .Values.ingressDocker.path }}
-            pathType: {{ default "Prefix" .Values.ingressDocker.pathType }}
+          - path: {{ $.Values.ingressDocker.path }}
+            pathType: {{ default "Prefix" $.Values.ingressDocker.pathType }}
             backend:
               service:
-                name: {{ include "nexus.fullname" . }}
+                name: {{ include "nexus.fullname" $ }}
                 port:
-                  number: {{ .Values.service.docker.port }}
+                  number: {{ $.Values.service.docker.port }}
+    {{- end }}
   {{- with .Values.ingressDocker.tls }}
   tls:
     {{- toYaml . | nindent 4 }}

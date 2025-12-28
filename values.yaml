@@ -85,6 +85,9 @@ ingressDocker:
   className: "traefik"
   annotations: {}
   host: nexus-docker.local
+  hosts:
+    - nexus-docker.local
+    - host.docker.internal
   path: /
   pathType: Prefix
   tls: []
