@@ -67,7 +67,7 @@ spec:
         - name: nexus-data-permissions
           image: {{ .Values.persistence.chownImage }}
           imagePullPolicy: IfNotPresent
-          command: ["sh", "-c", "chown -R 200:200 /nexus-data && chmod -R g+ws /nexus-data"]
+          command: ["sh", "-c", "mkdir -p /nexus-data/etc/logback && chown -R 200:200 /nexus-data && chmod -R g+ws /nexus-data"]
           securityContext:
             runAsUser: 0
             runAsGroup: 0

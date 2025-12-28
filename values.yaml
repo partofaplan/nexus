@@ -6,7 +6,7 @@ image:
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-replicaCount: 3
+replicaCount: 1
 
 ha:
   enabled: true
