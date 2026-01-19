@@ -22,7 +22,7 @@ Forward the service locally while you work through the onboarding wizard:
 kubectl port-forward svc/nexus 8081:8081 -n nexus
 ```
 
-The default admin password is written to `/nexus-data/admin.password` the first time Nexus starts. Retrieve it with:
+By default this chart disables random admin passwords (admin/admin123). If you enable random passwords, the initial admin password is written to `/nexus-data/admin.password` the first time Nexus starts. Retrieve it with:
 
 ```bash
 kubectl exec -n nexus sts/nexus -- cat /nexus-data/admin.password
@@ -65,33 +65,12 @@ kubectl exec -n nexus sts/nexus -- cat /nexus-data/admin.password
 | `ingress.enabled` | Creates an Ingress resource; configure `ingress.hosts`/`ingress.tls` for your cluster | `false` |
 | `persistence.size` | Requested storage for the Nexus data volume | `50Gi` |
 | `javaOpts` | JVM memory and GC tuning passed via `INSTALL4J_ADD_VM_PARAMS` | `-Xms1200m -Xmx1200m -XX:MaxDirectMemorySize=2g` |
-| `nexusProperties` | Optional map or multi-line string rendered to `/nexus-data/etc/<filename>` | `{}` |
+| `nexusProperties` | Optional map or multi-line string rendered to `/nexus-data/etc/<filename>` | `nexus.security.randompassword=false` |
 | `resources` | CPU / memory requests & limits for the main pod | `requests: {cpu: 500m, memory: 2Gi}` |
 
 Additional fields in `values.yaml` let you control service accounts, probes, topology spread constraints, ingress, extra containers, and arbitrary volumes/mounts.
 
-## Docker registry via Traefik TCP
-
-Nexus Docker repositories require a dedicated connector port so `/v2/` is served at the root. To expose that port through Traefik, enable the TCP route:
-
-```yaml
-service:
-  docker:
-    enabled: true
-    port: 5000
-
-ingressTcp:
-  enabled: true
-  entryPoints:
-    - docker
-  hostSNI: "*"
-  tls:
-    enabled: false
-```
-
-Configure Traefik with a TCP entrypoint on port 5000 (name must match `ingressTcp.entryPoints`) and set the Docker-hosted repo HTTP port in the Nexus UI to the same value.
-
-## Docker registry via HTTP ingress (shared port)
+## Docker registry via HTTP ingress
 
 If Traefik already fronts your cluster on a single HTTP entrypoint (for example port 8081), you can keep that port and route by hostname. Enable the Docker ingress and point it at the Docker connector port:
 
@@ -99,7 +78,7 @@ If Traefik already fronts your cluster on a single HTTP entrypoint (for example 
 service:
   docker:
     enabled: true
-    port: 5000
+    port: 15000
 
 ingressDocker:
   enabled: true
@@ -107,7 +86,7 @@ ingressDocker:
   path: /
 ```
 
-This keeps the UI on `nexus.local` and the registry on `nexus-docker.local` without opening another load balancer port. The registry URL is `nexus-docker.local:<traefik-port>`.
+This keeps the UI on `nexus.local` and the registry on `nexus-docker.local` over HTTP. The registry URL is `nexus-docker.local:15000`.
 
 ## Rendering and applying manifests
 

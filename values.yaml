@@ -20,7 +20,7 @@ ha:
 
 database:
   enabled: true
-  host: nexus-db-postgres-ha-primary.nexus.svc.cluster.local
+  host: nexus-db-postgres-ha-primary.nexus-db.svc.cluster.local
   port: 5432
   name: nexus
   schema: public
@@ -66,51 +66,31 @@ service:
   port: 80
   docker:
     enabled: true
-    port: 5000
+    port: 15000
     nodePort: null
 
 ingress:
   enabled: true
   className: "traefik"
-  annotations: {}
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
   hosts:
     - host: nexus.local
       paths:
         - path: /
           pathType: Prefix
-  tls:
-    - secretName: nexus-tls
-      hosts:
-        - nexus.local
 
 ingressDocker:
   enabled: true
   className: "traefik"
-  annotations: {}
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
   host: nexus-docker.local
   hosts:
     - nexus-docker.local
     - host.docker.internal
   path: /
   pathType: Prefix
-  tls:
-    - secretName: nexus-tls
-      hosts:
-        - nexus-docker.local
-        - host.docker.internal
-
-ingressTcp:
-  enabled: false
-  apiVersion: "traefik.io/v1alpha1"
-  annotations: {}
-  labels: {}
-  entryPoints:
-    - docker
-  hostSNI: "*"
-  tls:
-    enabled: false
-    passthrough: false
-    secretName: ""
 
 resources:
   requests:
@@ -178,5 +158,6 @@ startupProbe:
   successThreshold: 1
   failureThreshold: 30
 
-nexusProperties: {}
+nexusProperties:
+  nexus.security.randompassword: "false"
 nexusPropertiesFilename: nexus.properties
