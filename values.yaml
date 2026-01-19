@@ -84,13 +84,19 @@ ingressDocker:
   enabled: true
   className: "traefik"
   annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
   host: nexus-docker.local
   hosts:
     - nexus-docker.local
     - host.docker.internal
   path: /
   pathType: Prefix
+  tls:
+    - secretName: nexus-docker-tls
+      hosts:
+        - nexus-docker.local
+        - host.docker.internal
 
 resources:
   requests:
